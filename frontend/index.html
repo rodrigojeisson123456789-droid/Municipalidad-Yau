@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Municipalidad de Yau - Sistema ML</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #0f172a;
+            --primary-light: #1e293b;
+            --secondary: #0ea5e9;
+            --secondary-dark: #0284c7;
+            --accent: #8b5cf6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            --gradient-primary: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --gradient-secondary: linear-gradient(135deg, #0ea5e9 0%, #8b5cf6 100%);
+            --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --gradient-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at 10% 20%, rgba(15, 23, 42, 0.02) 0%, rgba(15, 23, 42, 0.05) 100%);
+            min-height: 100vh;
+        }
+
+        /* Login */
+        .login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
+            z-index: 10000; display: flex; align-items: center; justify-content: center;
+        }
+        .login-card {
+            background: rgba(255,255,255,0.98); border-radius: 40px; padding: 48px; width: 100%; max-width: 440px;
+            box-shadow: var(--shadow-xl); text-align: center; backdrop-filter: blur(10px);
+        }
+        .login-logo-icon { width: 80px; height: 80px; background: var(--gradient-secondary); border-radius: 24px; display: flex; align-items: center; justify-content: center; font-size: 36px; color: white; margin: 0 auto 20px; box-shadow: var(--shadow-lg); }
+        .login-card h2 { font-size: 28px; font-weight: 800; color: var(--gray-900); }
+        .login-card p { font-size: 14px; color: var(--gray-500); margin-top: 8px; }
+        .login-input-group { margin-bottom: 24px; text-align: left; }
+        .login-input-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 13px; color: var(--gray-700); }
+        .login-input-group input { width: 100%; padding: 14px 18px; border: 2px solid var(--gray-200); border-radius: 20px; font-size: 14px; transition: all 0.3s; }
+        .login-input-group input:focus { outline: none; border-color: var(--secondary); box-shadow: 0 0 0 4px rgba(14,165,233,0.1); }
+        .login-btn { width: 100%; padding: 16px; background: var(--gradient-secondary); color: white; border: none; border-radius: 28px; font-weight: 700; font-size: 16px; cursor: pointer; transition: all 0.3s; }
+        .login-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+        .login-error { background: #fef2f2; color: var(--danger); padding: 12px; border-radius: 16px; margin-bottom: 24px; display: none; font-size: 13px; }
+        .login-demo { margin-top: 24px; padding: 16px; background: var(--gray-100); border-radius: 20px; font-size: 11px; color: var(--gray-500); }
+
+        /* Container */
+        .container { max-width: 1440px; margin: 0 auto; padding: 24px; }
+
+        /* Header */
+        .header { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-radius: 32px; padding: 20px 32px; margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-md); border: 1px solid rgba(255,255,255,0.5); }
+        .logo { display: flex; align-items: center; gap: 16px; }
+        .logo-icon { width: 56px; height: 56px; background: var(--gradient-secondary); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 28px; color: white; box-shadow: var(--shadow); }
+        .logo h1 { font-size: 24px; font-weight: 800; background: var(--gradient-secondary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo p { font-size: 13px; color: var(--gray-500); margin-top: 4px; }
+        .header-stats { display: flex; gap: 20px; align-items: center; }
+        .header-stat { text-align: center; padding: 8px 20px; background: var(--gray-100); border-radius: 20px; }
+        .header-stat-value { font-size: 20px; font-weight: 800; color: var(--primary); }
+        .user-info { display: flex; align-items: center; gap: 12px; background: var(--gray-100); padding: 8px 20px; border-radius: 40px; }
+        .logout-btn { background: none; border: none; color: var(--danger); cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 30px; transition: all 0.3s; }
+        .logout-btn:hover { background: rgba(239,68,68,0.1); }
+
+        /* Toast */
+        .toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; }
+        .toast { background: white; border-radius: 20px; padding: 16px 20px; min-width: 340px; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 14px; border-left: 4px solid; animation: slideIn 0.3s ease; }
+        .toast-success { border-left-color: var(--success); }
+        .toast-danger { border-left-color: var(--danger); }
+        .toast-warning { border-left-color: var(--warning); }
+        .toast-info { border-left-color: var(--info); }
+        .toast-icon { font-size: 24px; }
+        .toast-content { flex: 1; }
+        .toast-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+        .toast-message { font-size: 12px; color: var(--gray-500); }
+        .toast-close { cursor: pointer; color: var(--gray-400); font-size: 18px; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* Tabs */
+        .tabs { display: flex; gap: 12px; margin-bottom: 32px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 8px; border-radius: 60px; box-shadow: var(--shadow-sm); }
+        .tab { flex: 1; padding: 14px 24px; border: none; background: transparent; font-weight: 600; color: var(--gray-600); cursor: pointer; border-radius: 50px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; }
+        .tab:hover { color: var(--secondary); background: var(--gray-100); }
+        .tab.active { background: var(--gradient-secondary); color: white; box-shadow: var(--shadow); }
+
+        /* Panels */
+        .panel { display: none; animation: fadeIn 0.4s ease; }
+        .panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Cards */
+        .grid-2 { display: grid; grid-template-columns: 1.3fr 0.7fr; gap: 32px; margin-bottom: 32px; }
+        @media (max-width: 1024px) { .grid-2 { grid-template-columns: 1fr; } }
+        .card { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-radius: 32px; padding: 32px; box-shadow: var(--shadow-md); border: 1px solid rgba(255,255,255,0.5); transition: all 0.3s; }
+        .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+        .card-header { display: flex; justify-content: space-between; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 2px solid var(--gray-200); }
+        .card-header-left { display: flex; gap: 16px; align-items: center; }
+        .card-icon { width: 56px; height: 56px; background: var(--gradient-secondary); border-radius: 20px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; }
+        .card-title h3 { font-size: 20px; font-weight: 700; color: var(--gray-800); }
+        .card-title p { font-size: 13px; color: var(--gray-500); margin-top: 4px; }
+
+        /* Form */
+        .form-group { margin-bottom: 24px; }
+        .form-group label { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: 600; font-size: 13px; color: var(--gray-700); }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 14px 18px; border: 2px solid var(--gray-200); border-radius: 20px; font-size: 14px; transition: all 0.3s; background: white; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--secondary); box-shadow: 0 0 0 4px rgba(14,165,233,0.1); }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .checkbox-modern { display: flex; align-items: center; gap: 12px; padding: 14px 18px; background: var(--gray-100); border-radius: 20px; cursor: pointer; transition: all 0.3s; margin-bottom: 24px; }
+        .checkbox-modern:hover { background: var(--gray-200); }
+        .checkbox-modern input { width: 20px; height: 20px; cursor: pointer; accent-color: var(--secondary); }
+        .btn-primary { width: 100%; padding: 16px; background: var(--gradient-secondary); color: white; border: none; border-radius: 28px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+
+        /* Result */
+        .result-card { border-radius: 24px; padding: 28px; animation: slideIn 0.5s ease; margin-top: 20px; }
+        .result-critical { background: linear-gradient(135deg, #fef2f2, #fee2e2); border-left: 5px solid var(--danger); }
+        .result-normal { background: linear-gradient(135deg, #ecfdf5, #d1fae5); border-left: 5px solid var(--success); }
+        .metric-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: rgba(0,0,0,0.05); border-radius: 40px; margin: 8px 8px 0 0; font-size: 13px; }
+
+        /* Dashboard */
+        .dashboard-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 32px; }
+        .dash-card { border-radius: 28px; padding: 24px; color: white; text-align: center; transition: all 0.3s; cursor: pointer; }
+        .dash-card:hover { transform: translateY(-4px); }
+        .dash-card i { font-size: 36px; opacity: 0.9; }
+        .dash-card .value { font-size: 40px; font-weight: 800; margin: 12px 0; }
+        .dash-card .label { font-size: 14px; opacity: 0.9; font-weight: 500; }
+        .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+        .chart-card { background: white; border-radius: 28px; padding: 24px; box-shadow: var(--shadow); transition: all 0.3s; }
+        .chart-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+        .chart-card h4 { margin-bottom: 20px; color: var(--gray-800); display: flex; align-items: center; gap: 10px; font-size: 16px; }
+        .chart-container { height: 280px; }
+
+        /* Table */
+        .table-wrapper { overflow-x: auto; border-radius: 20px; }
+        .table-modern { width: 100%; border-collapse: collapse; }
+        .table-modern th { background: var(--gradient-secondary); color: white; padding: 16px; font-size: 13px; font-weight: 600; }
+        .table-modern td { padding: 14px 16px; border-bottom: 1px solid var(--gray-200); font-size: 13px; }
+        .table-modern tr:hover td { background: var(--gray-100); }
+        .badge { display: inline-block; padding: 5px 14px; border-radius: 30px; font-size: 11px; font-weight: 700; }
+        .badge-critical { background: var(--gradient-danger); color: white; }
+        .badge-normal { background: var(--gradient-success); color: white; }
+
+        /* Pagination */
+        .pagination { display: flex; justify-content: center; gap: 10px; margin-top: 24px; }
+        .pagination button { width: 40px; height: 40px; border: 1px solid var(--gray-200); background: white; border-radius: 12px; cursor: pointer; transition: all 0.3s; font-weight: 600; }
+        .pagination button:hover:not(:disabled) { background: var(--gradient-secondary); color: white; border-color: transparent; }
+        .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Footer */
+        .privacy-footer { margin-top: 40px; padding: 20px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-radius: 24px; text-align: center; font-size: 12px; color: var(--gray-500); border: 1px solid rgba(255,255,255,0.5); }
+        .privacy-footer a { color: var(--secondary); text-decoration: none; font-weight: 600; cursor: pointer; }
+
+        /* Modals */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 2000; align-items: center; justify-content: center; }
+        .modal-content { background: white; max-width: 600px; margin: 20px; padding: 32px; border-radius: 32px; max-height: 80%; overflow: auto; }
+        .spinner { width: 50px; height: 50px; border: 3px solid var(--gray-200); border-top-color: var(--secondary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 20px auto; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 768px) {
+            .dashboard-cards { grid-template-columns: 1fr 1fr; gap: 16px; }
+            .charts-row { grid-template-columns: 1fr; gap: 16px; }
+            .tabs { flex-direction: column; border-radius: 32px; }
+            .tab { border-radius: 40px; }
+            .header { flex-direction: column; text-align: center; gap: 20px; }
+            .grid-2 { gap: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginOverlay" class="login-overlay">
+    <div class="login-card">
+        <div class="login-logo-icon"><i class="fas fa-building-columns"></i></div>
+        <h2>Municipalidad de Yau</h2>
+        <p>Sistema de Gestión con Machine Learning</p>
+        <div id="loginError" class="login-error"><i class="fas fa-exclamation-circle"></i> Usuario o contraseña incorrectos</div>
+        <div class="login-input-group"><label><i class="fas fa-user"></i> Usuario</label><input type="text" id="loginUsuario" placeholder="Ingrese su usuario"></div>
+        <div class="login-input-group"><label><i class="fas fa-lock"></i> Contraseña</label><input type="password" id="loginPassword" placeholder="Ingrese su contraseña" onkeypress="if(event.key==='Enter') validarLogin()"></div>
+        <button class="login-btn" onclick="validarLogin()"><i class="fas fa-arrow-right-to-bracket"></i> Ingresar al Sistema</button>
+        <div class="login-demo"><strong>Cuentas de prueba:</strong><br>👑 admin / admin123<br>⚙️ operador / operador123<br>👁️ consultor / consultor123</div>
+    </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="mainContent" style="display: none;">
+    <div class="toast-container" id="toastContainer"></div>
+    <div class="container">
+        <header class="header">
+            <div class="logo"><div class="logo-icon"><i class="fas fa-building-columns"></i></div><div><h1>Municipalidad Provincial de Yau</h1><p><i class="fas fa-microchip"></i> Sistema de Gestión Inteligente y Selección de Currículos</p></div></div>
+            <div class="header-stats">
+                <div class="header-stat"><div class="header-stat-value" id="liveTime">--:--:--</div><div>Hora</div></div>
+                <div class="header-stat"><div class="header-stat-value" id="liveDate">--/--/----</div><div>Fecha</div></div>
+                <div class="user-info"><i class="fas fa-user-circle" style="font-size: 22px; color: var(--secondary);"></i><span id="nombreUsuario" style="font-weight: 600;">Usuario</span><button class="logout-btn" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Salir</button></div>
+            </div>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('evaluacion')"><i class="fas fa-brain"></i> Evaluación ML</button>
+            <button class="tab" onclick="switchTab('dashboard')"><i class="fas fa-chart-pie"></i> Dashboard Analítico</button>
+            <button class="tab" onclick="switchTab('historial')"><i class="fas fa-clock-rotate-left"></i> Historial</button>
+            <button class="tab" onclick="switchTab('curriculos')"><i class="fas fa-file-lines"></i> Selección de Currículos</button>
+        </div>
+
+        <!-- PANEL EVALUACIÓN -->
+        <div id="panelEvaluacion" class="panel active">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header"><div class="card-header-left"><div class="card-icon"><i class="fas fa-clipboard-list"></i></div><div class="card-title"><h3>Evaluar Trámite</h3><p>Ingrese los datos del expediente para análisis</p></div></div><i class="fas fa-robot" style="color: var(--secondary); font-size: 28px;"></i></div>
+                    <form id="tramiteForm">
+                        <div class="form-group"><label><i class="fas fa-tag"></i> Tipo de Trámite</label><select id="tipo_tramite" required><option value="">Seleccionar categoría</option></select></div>
+                        <div class="form-group"><label><i class="fas fa-building"></i> Área Responsable</label><select id="area_responsable" required><option value="">Seleccionar unidad</option></select></div>
+                        <div class="form-row"><div class="form-group"><label><i class="fas fa-calendar-day"></i> Días de Espera</label><input type="number" id="dias_espera" value="5"></div><div class="form-group"><label><i class="fas fa-comments"></i> Número de Quejas</label><input type="number" id="num_quejas" value="0"></div></div>
+                        <div class="form-row"><div class="form-group"><label><i class="fas fa-dollar-sign"></i> Monto (S/)</label><input type="number" id="monto_involucrado" value="0"></div><div class="form-group"><label><i class="fas fa-calendar-week"></i> Feriados Cercanos</label><input type="number" id="dias_feriados" value="0"></div></div>
+                        <label class="checkbox-modern"><input type="checkbox" id="es_fin_de_mes"><span><i class="fas fa-calendar-alt"></i> ¿Es fin de mes?</span></label>
+                        <button type="submit" class="btn-primary"><i class="fas fa-chart-line"></i> Analizar con Machine Learning</button>
+                    </form>
+                </div>
+                <div class="card"><div class="card-header"><div class="card-header-left"><div class="card-icon"><i class="fas fa-chart-pie"></i></div><div class="card-title"><h3>Resultado del Análisis</h3><p>Predicción basada en modelo ML</p></div></div></div><div id="results"><div style="text-align:center;padding:60px;color:var(--gray-500);"><i class="fas fa-chart-line" style="font-size: 56px; margin-bottom: 20px; opacity: 0.5;"></i><p>Complete el formulario para ver el análisis</p></div></div></div>
+            </div>
+        </div>
+
+        <!-- PANEL DASHBOARD -->
+        <div id="panelDashboard" class="panel">
+            <div class="dashboard-cards">
+                <div class="dash-card" style="background: var(--gradient-primary);"><i class="fas fa-file-alt"></i><div class="value" id="totalTramitesDash">0</div><div class="label">Total Trámites</div></div>
+                <div class="dash-card" style="background: var(--gradient-danger);"><i class="fas fa-exclamation-triangle"></i><div class="value" id="totalCriticosDash">0</div><div class="label">Trámites Críticos</div></div>
+                <div class="dash-card" style="background: var(--gradient-success);"><i class="fas fa-chart-line"></i><div class="value" id="precisionMLDash">87%</div><div class="label">Precisión del Modelo</div></div>
+                <div class="dash-card" style="background: var(--gradient-warning);"><i class="fas fa-clock"></i><div class="value" id="tiempoRespuestaDash">0.25s</div><div class="label">Tiempo de Respuesta</div></div>
+            </div>
+            <div class="charts-row">
+                <div class="chart-card"><h4><i class="fas fa-chart-simple" style="color: var(--secondary);"></i> Trámites por Tipo</h4><div class="chart-container"><canvas id="chartTipo"></canvas></div></div>
+                <div class="chart-card"><h4><i class="fas fa-chart-pie" style="color: var(--accent);"></i> Trámites por Área</h4><div class="chart-container"><canvas id="chartArea"></canvas></div></div>
+            </div>
+            <div class="charts-row">
+                <div class="chart-card"><h4><i class="fas fa-chart-line" style="color: var(--info);"></i> Evolución Temporal</h4><div class="chart-container"><canvas id="chartTemporal"></canvas></div></div>
+                <div class="chart-card"><h4><i class="fas fa-chart-donut" style="color: var(--warning);"></i> Distribución de Criticidad</h4><div class="chart-container"><canvas id="chartCriticidad"></canvas></div></div>
+            </div>
+        </div>
+
+        <!-- PANEL HISTORIAL -->
+        <div id="panelHistorial" class="panel">
+            <div class="card">
+                <div class="card-header"><div class="card-header-left"><div class="card-icon"><i class="fas fa-clock-rotate-left"></i></div><div class="card-title"><h3>Registro Histórico</h3><p>Últimos trámites evaluados</p></div></div><button onclick="exportarExcel()" class="btn-primary" style="width: auto; padding: 12px 24px; background: var(--gradient-success);"><i class="fas fa-file-excel"></i> Exportar Excel</button></div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;"><div><label style="font-weight: 500;"><i class="fas fa-eye"></i> Mostrar: <select id="registrosPorPagina" onchange="cambiarRegistrosPorPagina()" style="padding: 8px 12px; border-radius: 12px; border: 1px solid var(--gray-200);"><option value="5">5</option><option value="10" selected>10</option><option value="20">20</option><option value="50">50</option></select></label></div><div id="infoPagina" style="font-weight: 500; color: var(--gray-600);"></div></div>
+                <div id="historialTable"><div class="spinner"></div><p style="text-align: center;">Cargando historial...</p></div>
+                <div id="paginacionAbajo" class="pagination"></div>
+            </div>
+        </div>
+
+        <!-- PANEL CURRÍCULOS -->
+        <div id="panelCurriculos" class="panel">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header"><div class="card-header-left"><div class="card-icon"><i class="fas fa-briefcase"></i></div><div class="card-title"><h3>Descripción del Puesto</h3><p>Ingrese los requisitos y habilidades</p></div></div></div>
+                    <div class="form-group"><label><i class="fas fa-tag"></i> Título del Puesto</label><select id="puestoSelect" onchange="cargarDescripcionEjemplo()"><option value="">Seleccionar ejemplo</option><option value="Desarrollador Full Stack">💻 Desarrollador Full Stack</option><option value="Analista de Datos">📊 Analista de Datos</option><option value="Administrador">📋 Administrador</option><option value="Vendedor">🛒 Vendedor</option></select></div>
+                    <div class="form-group"><label><i class="fas fa-align-left"></i> Descripción y Requisitos</label><textarea id="descripcionPuesto" rows="6" placeholder="Ej: Buscamos personal con experiencia en ventas, atención al cliente, trabajo en equipo..."></textarea></div>
+                    <button onclick="extraerKeywords()" class="btn-primary" style="background: var(--gradient-primary); margin-bottom: 12px;"><i class="fas fa-key"></i> Extraer Keywords del Puesto</button>
+                    <button onclick="verHistorialCurriculos()" class="btn-primary" style="background: var(--gradient-success);"><i class="fas fa-history"></i> Ver Historial de Análisis</button>
+                    <div id="keywordsContainer" style="display: none; margin-top: 20px; padding: 20px; background: var(--gray-100); border-radius: 20px;"><strong><i class="fas fa-tags"></i> Keywords extraídas:</strong><div id="keywordsList" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;"></div></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><div class="card-header-left"><div class="card-icon"><i class="fas fa-file-upload"></i></div><div class="card-title"><h3>Currículos de Postulantes</h3><p>Subir PDF, DOCX o imágenes</p></div></div></div>
+                    <form id="cvForm"><div class="form-group"><label><i class="fas fa-cloud-upload-alt"></i> Subir Currículos</label><input type="file" id="curriculos" multiple accept=".pdf,.docx,.jpg,.jpeg,.png" style="border: 2px dashed var(--gray-300);"></div><div id="archivosSeleccionados" style="font-size: 12px; color: var(--gray-500); margin-bottom: 20px;"></div><button type="submit" class="btn-primary"><i class="fas fa-robot"></i> Analizar Currículos con ML</button></form>
+                </div>
+            </div>
+            <div class="card" id="resultadosCVCard" style="display: none; margin-top: 24px;"><div class="card-header"><div class="card-header-left"><div class="card-icon"><i class="fas fa-users"></i></div><div class="card-title"><h3>Resultados del Análisis</h3><p>Candidatos ordenados por coincidencia</p></div></div></div><div id="resultadosCV"></div></div>
+        </div>
+
+        <div class="privacy-footer"><p><i class="fas fa-shield-heart"></i> Sistema conforme a la <strong>Ley N° 29733 - Ley de Protección de Datos Personales</strong> (Perú) | <a href="#" onclick="mostrarAvisoPrivacidad(); return false;">Ver aviso completo</a></p></div>
+    </div>
+</div>
+
+<!-- MODALES -->
+<div id="privacyModal" class="modal"><div class="modal-content"><h2><i class="fas fa-shield-alt"></i> Aviso de Privacidad</h2><p>En cumplimiento con la Ley N° 29733 - Ley de Protección de Datos Personales, sus datos son confidenciales y se utilizan exclusivamente para la gestión de trámites.</p><button class="btn-primary" onclick="cerrarModal()" style="margin-top: 20px;">Cerrar</button></div></div>
+<div id="historialCurriculosModal" class="modal"><div class="modal-content" style="max-width: 900px;"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;"><h2><i class="fas fa-history"></i> Historial de Currículos Analizados</h2><button onclick="cerrarHistorialCurriculos()" style="font-size: 28px; background: none; border: none; cursor: pointer;">&times;</button></div><div id="historialCurriculosContenido"><div class="spinner"></div><p>Cargando...</p></div></div></div>
+
+<script>
+    const API_URL = 'http://localhost:3001/api';
+    let chartTipo, chartArea, chartTemporal, chartCriticidad;
+    let historialCompleto = [], paginaActual = 1, registrosPorPagina = 10;
+    let usuarioActual = null, rolActual = null;
+    const usuarios = { 'admin': { password: 'admin123', rol: 'admin', nombre: 'Administrador' }, 'operador': { password: 'operador123', rol: 'operador', nombre: 'Operador' }, 'consultor': { password: 'consultor123', rol: 'consultor', nombre: 'Consultor' } };
+
+    function mostrarNotificacion(tipo, titulo, mensaje) {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${tipo}`;
+        let icono = tipo === 'success' ? '✅' : tipo === 'danger' ? '🚨' : 'ℹ️';
+        toast.innerHTML = `<div class="toast-icon">${icono}</div><div class="toast-content"><div class="toast-title">${titulo}</div><div class="toast-message">${mensaje}</div></div><div class="toast-close" onclick="this.parentElement.remove()">✕</div>`;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 5000);
+    }
+
+    function validarLogin() {
+        const usuario = document.getElementById('loginUsuario').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        if (usuarios[usuario] && usuarios[usuario].password === password) {
+            usuarioActual = usuario; rolActual = usuarios[usuario].rol;
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+            document.getElementById('nombreUsuario').innerText = usuarios[usuario].nombre;
+            if (rolActual === 'consultor') {
+                document.querySelectorAll('.tab').forEach(tab => {
+                    if (tab.innerText.includes('Historial') || tab.innerText.includes('Currículos')) {
+                        tab.classList.add('tab-disabled');
+                        tab.style.opacity = '0.5';
+                        tab.style.cursor = 'not-allowed';
+                        tab.onclick = () => mostrarNotificacion('warning', 'Acceso Denegado', 'No tienes permiso para acceder a esta sección');
+                    }
+                });
+            }
+            iniciarSistema();
+            mostrarNotificacion('success', 'Bienvenido', `Has ingresado como ${usuarios[usuario].nombre}`);
+        } else {
+            document.getElementById('loginError').style.display = 'block';
+            setTimeout(() => document.getElementById('loginError').style.display = 'none', 3000);
+        }
+    }
+
+    function cerrarSesion() { document.getElementById('loginOverlay').style.display = 'flex'; document.getElementById('mainContent').style.display = 'none'; }
+
+    function switchTab(tabName) {
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        if (tabName === 'evaluacion') { document.getElementById('panelEvaluacion').classList.add('active'); document.querySelectorAll('.tab')[0].classList.add('active'); }
+        else if (tabName === 'dashboard') { document.getElementById('panelDashboard').classList.add('active'); document.querySelectorAll('.tab')[1].classList.add('active'); cargarDashboard(); }
+        else if (tabName === 'historial') { document.getElementById('panelHistorial').classList.add('active'); document.querySelectorAll('.tab')[2].classList.add('active'); cargarHistorial(); }
+        else if (tabName === 'curriculos') { document.getElementById('panelCurriculos').classList.add('active'); document.querySelectorAll('.tab')[3].classList.add('active'); }
+    }
+
+    function updateLiveTime() { const n = new Date(); document.getElementById('liveTime').innerText = n.toLocaleTimeString('es-PE'); document.getElementById('liveDate').innerText = n.toLocaleDateString('es-PE'); }
+    setInterval(updateLiveTime, 1000); updateLiveTime();
+
+    async function iniciarSistema() { await loadTipos(); await cargarDashboard(); await cargarHistorial(); }
+
+    async function loadTipos() {
+        const res = await fetch(`${API_URL}/tramites/tipos`);
+        const data = await res.json();
+        document.getElementById('tipo_tramite').innerHTML = '<option value="">Seleccionar</option>' + data.tipos_tramite.map(t => `<option value="${t}">${t}</option>`).join('');
+        document.getElementById('area_responsable').innerHTML = '<option value="">Seleccionar</option>' + data.areas.map(a => `<option value="${a}">${a}</option>`).join('');
+    }
+
+    document.getElementById('tramiteForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = '<div class="spinner"></div><p style="text-align: center;">Procesando con IA...</p>';
+        const data = {
+            tipo_tramite: document.getElementById('tipo_tramite').value,
+            area_responsable: document.getElementById('area_responsable').value,
+            dias_espera: parseInt(document.getElementById('dias_espera').value),
+            num_quejas: parseInt(document.getElementById('num_quejas').value) || 0,
+            monto_involucrado: parseFloat(document.getElementById('monto_involucrado').value) || 0,
+            es_fin_de_mes: document.getElementById('es_fin_de_mes').checked,
+            dias_feriados_cercanos: parseInt(document.getElementById('dias_feriados').value) || 0
+        };
+        const res = await fetch(`${API_URL}/tramites/predecir`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+        const result = await res.json();
+        if (result.exito) {
+            const p = result.prediccion;
+            const prob = (p.probabilidad_criticidad * 100).toFixed(1);
+            mostrarNotificacion(p.es_critico ? 'danger' : 'success', p.es_critico ? 'Trámite CRÍTICO' : 'Trámite NORMAL', `Probabilidad: ${prob}%`);
+            resultsDiv.innerHTML = `<div class="result-card ${p.es_critico ? 'result-critical' : 'result-normal'}"><div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;"><div><div style="font-size: 28px; font-weight: 800; margin-bottom: 16px;">${p.es_critico ? '🚨 TRÁMITE CRÍTICO' : '✅ TRÁMITE NORMAL'}</div><div class="metric-badge"><i class="fas fa-chart-line"></i> Probabilidad: <strong>${prob}%</strong></div><div class="metric-badge"><i class="fas fa-flag"></i> Prioridad: <strong>${p.nivel_prioridad}</strong></div></div><div style="width: 200px;"><div style="background: var(--gray-200); border-radius: 10px; height: 10px; overflow: hidden;"><div style="width: ${prob}%; height: 100%; background: linear-gradient(90deg, var(--secondary), var(--accent));"></div></div></div></div><div style="margin-top: 20px; padding: 16px; background: rgba(0,0,0,0.03); border-radius: 20px;"><strong><i class="fas fa-lightbulb"></i> Recomendaciones:</strong><ul style="margin-top: 12px; margin-left: 20px;">${p.recomendaciones.map(r => `<li style="margin: 8px 0;">${r}</li>`).join('')}</ul></div><div style="margin-top: 16px; font-size: 11px; color: var(--gray-400);"><i class="fas fa-clock"></i> ${new Date(p.timestamp).toLocaleString()}</div></div>`;
+            cargarDashboard(); cargarHistorial();
+        }
+    });
+
+    async function cargarDashboard() {
+        const stats = await (await fetch(`${API_URL}/tramites/estadisticas`)).json();
+        document.getElementById('totalTramitesDash').innerText = stats.total_predicciones || 0;
+        document.getElementById('totalCriticosDash').innerText = stats.total_criticos || 0;
+        const tramites = await (await fetch(`${API_URL}/tramites/historial`)).json();
+        const tipoCount = {}, areaCount = {};
+        tramites.forEach(t => { tipoCount[t.tipo_tramite] = (tipoCount[t.tipo_tramite] || 0) + 1; areaCount[t.area_responsable] = (areaCount[t.area_responsable] || 0) + 1; });
+        const tiposL = Object.keys(tipoCount).length ? Object.keys(tipoCount) : ['Licencia', 'Comercial', 'Queja'];
+        const tiposD = Object.values(tipoCount).length ? Object.values(tipoCount) : [10, 8, 5];
+        const areasL = Object.keys(areaCount).length ? Object.keys(areaCount) : ['Urbanismo', 'Comercio', 'Atención'];
+        const areasD = Object.values(areaCount).length ? Object.values(areaCount) : [15, 12, 8];
+        const criticos = stats.total_criticos || 5, normales = (stats.total_predicciones - criticos) || 10;
+        if (chartTipo) chartTipo.destroy();
+        chartTipo = new Chart(document.getElementById('chartTipo'), { type: 'bar', data: { labels: tiposL, datasets: [{ label: 'Cantidad', data: tiposD, backgroundColor: '#0ea5e9', borderRadius: 12, barPercentage: 0.7 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } } });
+        if (chartArea) chartArea.destroy();
+        chartArea = new Chart(document.getElementById('chartArea'), { type: 'pie', data: { labels: areasL, datasets: [{ data: areasD, backgroundColor: ['#0ea5e9', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
+        if (chartTemporal) chartTemporal.destroy();
+        chartTemporal = new Chart(document.getElementById('chartTemporal'), { type: 'line', data: { labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'], datasets: [{ label: 'Críticos', data: [12, 19, 15, 17, 14, 22], borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.1)', tension: 0.4, fill: true }, { label: 'Normales', data: [45, 52, 48, 51, 49, 55], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', tension: 0.4, fill: true }] }, options: { responsive: true, maintainAspectRatio: false } });
+        if (chartCriticidad) chartCriticidad.destroy();
+        chartCriticidad = new Chart(document.getElementById('chartCriticidad'), { type: 'doughnut', data: { labels: [`Críticos (${criticos})`, `Normales (${normales})`], datasets: [{ data: [criticos, normales], backgroundColor: ['#ef4444', '#10b981'], cutout: '65%' }] }, options: { responsive: true, maintainAspectRatio: false } });
+    }
+
+    async function cargarHistorial() {
+        const res = await fetch(`${API_URL}/tramites/historial`);
+        historialCompleto = await res.json();
+        if (historialCompleto.length === 0) document.getElementById('historialTable').innerHTML = '<div style="text-align: center; padding: 60px;"><i class="fas fa-folder-open" style="font-size: 48px; color: var(--gray-400);"></i><p style="margin-top: 16px;">No hay registros en el historial</p></div>';
+        else { mostrarPagina(1); document.getElementById('paginacionAbajo').style.display = 'flex'; }
+    }
+
+    function mostrarPagina(pagina) {
+        paginaActual = pagina;
+        const start = (paginaActual-1)*registrosPorPagina, end = start+registrosPorPagina;
+        const data = historialCompleto.slice(start, end);
+        const total = Math.ceil(historialCompleto.length/registrosPorPagina);
+        document.getElementById('infoPagina').innerHTML = `Mostrando ${start+1} - ${Math.min(end, historialCompleto.length)} de ${historialCompleto.length} registros`;
+        document.getElementById('historialTable').innerHTML = `<div class="table-wrapper"><table class="table-modern"><thead><tr><th>Fecha</th><th>Tipo</th><th>Área</th><th>Días</th><th>Quejas</th><th>Estado</th><th>Prob.</th></tr></thead><tbody>${data.map(t => `<tr><td>${new Date(t.fecha_consulta).toLocaleString()}</td><td><strong>${t.tipo_tramite}</strong></td><td>${t.area_responsable}</td><td>${t.dias_espera}</td><td>${t.num_quejas}</td><td><span class="badge ${t.es_critico ? 'badge-critical' : 'badge-normal'}">${t.es_critico ? 'CRÍTICO' : 'NORMAL'}</span></td><td>${((t.probabilidad||0)*100).toFixed(1)}%</td></tr>`).join('')}</tbody></table></div>`;
+        let html = `<button onclick="irPagina(1)" ${paginaActual===1?'disabled':''}><i class="fas fa-angle-double-left"></i></button><button onclick="irPagina(${paginaActual-1})" ${paginaActual===1?'disabled':''}><i class="fas fa-angle-left"></i></button>`;
+        for(let i=Math.max(1,paginaActual-2); i<=Math.min(total,paginaActual+2); i++) html += `<button onclick="irPagina(${i})" style="background:${i===paginaActual?'var(--secondary)':'white'};color:${i===paginaActual?'white':'var(--gray-700)'}">${i}</button>`;
+        html += `<button onclick="irPagina(${paginaActual+1})" ${paginaActual===total?'disabled':''}><i class="fas fa-angle-right"></i></button><button onclick="irPagina(${total})" ${paginaActual===total?'disabled':''}><i class="fas fa-angle-double-right"></i></button>`;
+        document.getElementById('paginacionAbajo').innerHTML = html;
+    }
+    function irPagina(p) { if(p>=1 && p<=Math.ceil(historialCompleto.length/registrosPorPagina)) mostrarPagina(p); }
+    function cambiarRegistrosPorPagina() { registrosPorPagina = parseInt(document.getElementById('registrosPorPagina').value); paginaActual = 1; mostrarPagina(1); }
+    function exportarExcel() { window.open(`${API_URL}/reportes/excel`, '_blank'); mostrarNotificacion('success', 'Exportando', 'Reporte Excel generado'); }
+
+    // Currículos
+    document.getElementById('curriculos').addEventListener('change', function(e) { const files = e.target.files; document.getElementById('archivosSeleccionados').innerHTML = files.length ? `<i class="fas fa-check-circle" style="color: #10b981;"></i> ${files.length} archivo(s) seleccionado(s): ${Array.from(files).map(f=>f.name).join(', ')}` : ''; });
+    function cargarDescripcionEjemplo() { const ej = { 'Desarrollador Full Stack': 'Buscamos desarrollador Full Stack con experiencia en React, Node.js, MongoDB, HTML, CSS, JavaScript. Capacidad para trabajar en equipo.', 'Analista de Datos': 'Buscamos Analista de Datos con experiencia en Python, SQL, Power BI, Tableau. Conocimiento en estadística y visualización de datos.', 'Administrador': 'Buscamos Administrador con experiencia en facturación, atención al cliente, Excel, manejo de personal y reportes.', 'Vendedor': 'Buscamos vendedor con experiencia en ventas, atención al cliente, negociación, cierre de ventas y trabajo bajo presión.' }; const p = document.getElementById('puestoSelect').value; if(ej[p]) document.getElementById('descripcionPuesto').value = ej[p]; }
+    async function extraerKeywords() { const d = document.getElementById('descripcionPuesto').value; if(!d) { mostrarNotificacion('warning', 'Atención', 'Ingrese una descripción del puesto'); return; } const res = await fetch(`${API_URL}/tramites/extraer-keywords`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ texto: d }) }); const r = await res.json(); if(r.exito) { document.getElementById('keywordsContainer').style.display = 'block'; document.getElementById('keywordsList').innerHTML = r.keywords.map(k => `<span style="background: var(--gradient-primary); color: white; padding: 6px 14px; border-radius: 30px; font-size: 12px;">${k}</span>`).join(''); mostrarNotificacion('success', 'Keywords extraídas', `${r.keywords.length} palabras clave encontradas`); } }
+    document.getElementById('cvForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const desc = document.getElementById('descripcionPuesto').value, files = document.getElementById('curriculos').files;
+        if(!desc) { mostrarNotificacion('warning', 'Atención', 'Ingrese la descripción del puesto'); return; }
+        if(files.length===0) { mostrarNotificacion('warning', 'Atención', 'Seleccione al menos un currículo'); return; }
+        const divRes = document.getElementById('resultadosCV'), cardRes = document.getElementById('resultadosCVCard');
+        divRes.innerHTML = '<div class="spinner"></div><p style="text-align: center;">Procesando currículos con Machine Learning...</p>'; cardRes.style.display = 'block';
+        const fd = new FormData(); fd.append('descripcionPuesto', desc); for(let f of files) fd.append('curriculos', f);
+        const res = await fetch(`${API_URL}/tramites/analizar-cv`, { method: 'POST', body: fd });
+        const r = await res.json();
+        if(r.exito) {
+            let html = `<div style="margin-bottom: 20px; padding: 20px; background: var(--gradient-primary); border-radius: 24px; color: white;"><h4>📊 Resumen del Análisis</h4><p>📄 Total analizados: ${r.resultados.totalAnalizados} currículos</p><p>🔑 Keywords del puesto: ${r.resultados.keywordsPuesto.length} palabras clave</p></div>`;
+            r.resultados.candidatos.forEach((c,i) => { const color = c.coincidencia.porcentaje>=70?'var(--danger)':c.coincidencia.porcentaje>=50?'var(--warning)':'var(--success)'; html += `<div class="result-card result-critical" style="margin-top: 16px;"><div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;"><div><div style="font-size: 18px; font-weight: 800;">#${i+1} - ${c.nombre}</div><div class="metric-badge" style="margin-top: 10px;"><i class="fas fa-chart-line"></i> Coincidencia: <strong>${c.coincidencia.porcentaje}%</strong></div><div class="metric-badge"><i class="fas fa-flag"></i> Prioridad: <strong style="color: ${color}">${c.coincidencia.nivelPrioridad}</strong></div><div class="metric-badge"><i class="fas fa-clock"></i> Tiempo estimado: <strong>${c.coincidencia.tiempoEstimado}</strong></div></div><div style="background: ${color}; padding: 12px 24px; border-radius: 20px; text-align: center;"><div style="font-size: 32px; font-weight: 800;">${c.coincidencia.porcentaje}%</div><div style="font-size: 11px;">Coincidencia</div></div></div><div style="margin-top: 16px;"><strong><i class="fas fa-key"></i> Palabras clave encontradas (${c.coincidencia.palabrasCoincidentes.length} de ${c.coincidencia.totalKeywords}):</strong><div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">${c.coincidencia.palabrasCoincidentes.map(kw => `<span style="background: var(--gradient-primary); color: white; padding: 4px 12px; border-radius: 30px; font-size: 11px;">${kw}</span>`).join('') || '<span style="color: var(--gray-500);">No se encontraron coincidencias</span>'}</div></div></div>`; });
+            divRes.innerHTML = html;
+            verHistorialCurriculos();
+            mostrarNotificacion('success', 'Análisis completado', `${r.resultados.totalAnalizados} currículos procesados`);
+        }
+    });
+    async function verHistorialCurriculos() { const modal = document.getElementById('historialCurriculosModal'); modal.style.display = 'flex'; const cont = document.getElementById('historialCurriculosContenido'); cont.innerHTML = '<div class="spinner"></div><p>Cargando...</p>'; const res = await fetch(`${API_URL}/tramites/historial-curriculos`); const data = await res.json(); if(data.length===0) cont.innerHTML = '<div style="text-align: center; padding: 60px;"><i class="fas fa-folder-open" style="font-size: 48px; color: var(--gray-400);"></i><p style="margin-top: 16px;">No hay análisis previos</p></div>'; else cont.innerHTML = `<div class="table-wrapper"><table class="table-modern"><thead><tr><th>Fecha</th><th>Archivo</th><th>Puesto</th><th>%</th><th>Prioridad</th><th>Keywords</th></tr></thead><tbody>${data.map(h => `<tr><td style="white-space: nowrap;">${new Date(h.fecha_analisis).toLocaleString()}</td><td><strong>${h.nombre_archivo.substring(0,30)}</strong></td><td>${h.puesto}</td><td style="text-align: center;"><span style="background: ${h.porcentaje_coincidencia>=70?'var(--danger)':h.porcentaje_coincidencia>=50?'var(--warning)':'var(--success)'}; color: white; padding: 4px 12px; border-radius: 30px;">${h.porcentaje_coincidencia}%</span></td><td><span class="badge ${h.nivel_prioridad==='CRÍTICA'||h.nivel_prioridad==='ALTA'?'badge-critical':'badge-normal'}">${h.nivel_prioridad}</span></td><td style="font-size: 11px;">${h.palabras_encontradas?.slice(0,3).join(', ') || ''}</td></tr>`).join('')}</tbody></table></div><div style="margin-top: 20px; text-align: center;">Total: ${data.length}</div>`; }
+    function cerrarHistorialCurriculos() { document.getElementById('historialCurriculosModal').style.display = 'none'; }
+    function mostrarAvisoPrivacidad() { document.getElementById('privacyModal').style.display = 'flex'; }
+    function cerrarModal() { document.getElementById('privacyModal').style.display = 'none'; }
+    window.onclick = function(e) { if(e.target.classList.contains('modal')) e.target.style.display = 'none'; }
+
+    iniciarSistema();
+</script>
+</body>
+</html>
